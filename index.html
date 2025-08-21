@@ -45,31 +45,9 @@
             padding: 30px;
             border: 3px solid var(--accent-color);
             overflow: hidden;
-            position: relative; /* Para o botão de mudo */
+            position: relative;
         }
         
-        /* Botão de Mudo */
-        #mute-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: 2px solid var(--accent-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 5;
-        }
-        #mute-btn svg {
-            width: 24px;
-            height: 24px;
-            stroke: var(--accent-color);
-        }
-
         /* Estilos das Telas */
         .screen {
             display: none;
@@ -257,7 +235,7 @@
         .spatial-shape-item:hover {
             background-color: var(--locked-color);
         }
-        .spatial-shape-item img {
+        .spatial-shape-item svg {
             width: 100px;
             height: 100px;
         }
@@ -345,12 +323,6 @@
 <body>
 
     <div id="game-container">
-        <!-- BOTÃO DE MUDO -->
-        <button id="mute-btn">
-            <svg id="sound-on-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-            <svg id="sound-off-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
-        </button>
-
         <!-- TELA DE LOGIN -->
         <div id="login-screen" class="screen active">
             <h1><svg class="icon" style="width:40px; height:40px; display:inline-block; vertical-align: -5px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Missão Agente Secreta</h1>
@@ -434,9 +406,6 @@
         const startGameBtn = document.getElementById('start-game-btn');
         const backToMissionsBtn = document.getElementById('back-to-missions-btn');
         const missionBtns = document.querySelectorAll('.mission-btn');
-        const muteBtn = document.getElementById('mute-btn');
-        const soundOnIcon = document.getElementById('sound-on-icon');
-        const soundOffIcon = document.getElementById('sound-off-icon');
         const showReportBtn = document.getElementById('show-report-btn');
         const playAgainBtn = document.getElementById('play-again-btn');
         const backToStartBtn = document.getElementById('back-to-start-btn');
@@ -444,43 +413,6 @@
         // Dados do Jogo
         let gameData;
         let playerName = '';
-        let isMuted = false;
-
-        // --- CONTROLE DE ÁUDIO ---
-        const audioSources = {
-            music: 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1BpbmdlciBmb3IgTEFNRSBjb2RlYwBCbHVlIFNreQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRGFtZTMuOTkuNVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//tAwSAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-            correct: 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1BpbmdlciBmb3IgTEFNRSBjb2RlYwB0aW5nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRGFtZTMuOTkuNVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//tAwSAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-            incorrect: 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1BpbmdlciBmb3IgTEFNRSBjb2RlYwBidXp6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRGFtZTMuOTkuNVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//tAwSAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-            click: 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1BpbmdlciBmb3IgTEFNRSBjb2RlYwBjbGljawAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRGFtZTMuOTkuNVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//tAwSAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
-        };
-
-        const audio = {};
-        for (const key in audioSources) {
-            audio[key] = new Audio(audioSources[key]);
-        }
-        audio.music.loop = true;
-        audio.music.volume = 0.3;
-
-        function playSound(soundName) {
-            if (!isMuted) {
-                const sound = audio[soundName];
-                if (sound) {
-                    sound.currentTime = 0;
-                    sound.play().catch(e => console.log("Audio play failed:", e));
-                }
-            }
-        }
-
-        function toggleMute() {
-            isMuted = !isMuted;
-            soundOnIcon.style.display = isMuted ? 'none' : 'block';
-            soundOffIcon.style.display = isMuted ? 'block' : 'none';
-            audio.music.muted = isMuted;
-        }
-
-        muteBtn.addEventListener('click', toggleMute);
-        // --- FIM DO CONTROLE DE ÁUDIO ---
-
 
         // Função para inicializar/resetar os dados do jogo
         function initializeGameData() {
@@ -544,7 +476,6 @@
             const allMissions = Object.values(gameData.missions);
             const allMissionsCompleted = allMissions.every(m => m.completed);
             if (allMissionsCompleted) {
-                audio.music.pause();
                 gameOverMessage.textContent = `Parabéns, Agente ${playerName}! Você deteve o Dr. Desordem e recuperou os itens secretos.`;
                 sendReportByEmail();
                 showScreen('game-over-screen');
@@ -563,27 +494,81 @@
             }
             
             if (isSuccess) {
-                playSound('correct');
                 showFeedback('Incrível, Agente!', true);
-            } else {
-                playSound('incorrect');
-                showFeedback('Tente de novo, agente!', false);
-            }
-            
-            if (isSuccess) {
                 checkMissionCompletion(missionId);
                 updateMissionButtons();
+            } else {
+                showFeedback('Tente de novo, agente!', false);
             }
         }
 
+        // --- Funções para gerar problemas dinâmicos ---
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        
+        // Funções para Missão 1
+        function generateCalendarProblem() {
+            const startDay = getRandomInt(1, 15);
+            const weeks = getRandomInt(1, 2);
+            const days = getRandomInt(1, 6);
+            const answer = startDay + (weeks * 7) + days;
+            const text = `o Dr. Desordem planeja agir ${weeks} semana(s) e ${days} dia(s) depois do dia ${startDay} de maio.`;
+            return { startDay, answer, text };
+        }
+
+        function numberToWords(num) {
+            const ones = ['', 'uma', 'duas', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+            const teens = ['dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+            const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta'];
+            if (num === 0) return 'zero';
+            if (num < 10) return ones[num];
+            if (num < 20) return teens[num - 10];
+            const ten = Math.floor(num / 10);
+            const one = num % 10;
+            return tens[ten] + (one > 0 ? ' e ' + ones[one] : '');
+        }
+
+        function generateClockProblem() {
+            const hour = getRandomInt(0, 23);
+            const minute = getRandomInt(0, 59);
+            const hourText = numberToWords(hour);
+            const minuteText = minute > 0 ? numberToWords(minute) : '';
+            let text = `O alarme tocará às '${hourText} hora(s)${minute > 0 ? ` e ${minuteText} minutos` : ''}'.`;
+            if (hour === 1) text = text.replace('hora(s)', 'hora');
+            return { hour, minute, text };
+        }
+        
+        // Funções para Missão 2
+        function generateAdditionProblem() {
+            let num1, num2;
+            do {
+                num1 = getRandomInt(11, 89);
+                num2 = getRandomInt(11, 89);
+            } while ((num1 % 10) + (num2 % 10) < 10); // Garante o "vai um"
+            return { num1, num2, answer: num1 + num2 };
+        }
+
+        function generateSubtractionProblem() {
+            let num1, num2;
+            do {
+                num1 = getRandomInt(50, 99);
+                num2 = getRandomInt(11, 49);
+            } while ((num1 % 10) >= (num2 % 10)); // Garante o "emprestar"
+            return { num1, num2, answer: num1 - num2 };
+        }
+        
         // --- Lógica das Missões ---
         const missions = {
             1: {
                 title: "Missão 1: O Cronograma Secreto",
                 challenges: [
-                    { // Desafio 1.1: Calendário
-                        instruction: "Agente, o Dr. Desordem planeja agir 2 semanas e 3 dias depois de 10 de maio. Use o calendário para descobrir a data exata.",
+                    { // Desafio 1.1: Calendário Dinâmico
+                        instruction: "Agente, decifre a pista do cronograma:",
                         render: (container) => {
+                            const problem = generateCalendarProblem();
+                            container.parentElement.querySelector('#mission-instruction').textContent = `Agente, ${problem.text} Descubra a data exata.`;
+
                             const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
                             const calendar = document.createElement('div');
                             calendar.id = 'calendar';
@@ -607,11 +592,10 @@
                                 dayEl.className = 'calendar-day';
                                 dayEl.textContent = day;
                                 dayEl.dataset.day = day;
-                                if (day === 10) dayEl.classList.add('start-day');
+                                if (day === problem.startDay) dayEl.classList.add('start-day');
                                 
                                 dayEl.addEventListener('click', () => {
-                                    playSound('click');
-                                    const isCorrect = day === 27; // 10 + 14 + 3
+                                    const isCorrect = day === problem.answer;
                                     recordAttempt(1, 1, isCorrect);
                                     if(isCorrect) {
                                        setTimeout(() => startMission(1, 1), 1600);
@@ -623,9 +607,11 @@
                             container.appendChild(calendar);
                         }
                     },
-                    { // Desafio 1.2: Relógio Digital
-                        instruction: "A pista diz que o alarme secreto tocará às 'quinze horas e quarenta e cinco minutos'. Ajuste o relógio digital para desativá-lo!",
+                    { // Desafio 1.2: Relógio Digital Dinâmico
+                        instruction: "Ajuste o relógio digital para a hora correta para desativá-lo!",
                         render: (container) => {
+                            const problem = generateClockProblem();
+                            container.parentElement.querySelector('#mission-instruction').textContent = problem.text;
                             container.innerHTML = `
                                 <input type="number" id="hours-input" class="challenge-input" min="0" max="23" placeholder="HH">
                                 <span>:</span>
@@ -634,10 +620,9 @@
                                 <button id="check-time-btn" class="btn">Verificar</button>
                             `;
                             document.getElementById('check-time-btn').addEventListener('click', () => {
-                                playSound('click');
                                 const hours = document.getElementById('hours-input').value;
                                 const minutes = document.getElementById('minutes-input').value;
-                                const isCorrect = hours === '15' && minutes === '45';
+                                const isCorrect = parseInt(hours) === problem.hour && parseInt(minutes) === problem.minute;
                                 recordAttempt(1, 2, isCorrect);
                                 if(isCorrect) {
                                    setTimeout(() => startMission(1, 2), 1600);
@@ -645,16 +630,16 @@
                             });
                         }
                     },
-                    { // Desafio 1.3: Datas de Validade
+                    { // Desafio 1.3: Datas de Validade Dinâmicas
                         instruction: "Encontramos o lanche do Dr. Desordem. Só podemos abrir a embalagem que está dentro da validade. Qual delas é?",
                         render: (container) => {
                             const today = new Date();
-                            const validDate = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+                            const formatDate = (date) => `${date.getDate().toString().padStart(2,'0')}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getFullYear().toString().slice(-2)}`;
                             
                             const items = [
-                                { name: 'Suco de Uva', valid: true, date: `VAL: ${validDate.getDate().toString().padStart(2,'0')}/${(validDate.getMonth()+1).toString().padStart(2,'0')}/${validDate.getFullYear().toString().slice(-2)}` },
-                                { name: 'Biscoito', valid: false, date: 'VAL: 01/03/24' },
-                                { name: 'Iogurte', valid: false, date: 'VAL: 15/01/25' },
+                                { name: 'Suco de Uva', valid: true, date: `VAL: ${formatDate(new Date(today.getFullYear() + 1, getRandomInt(0, 11), getRandomInt(1, 28)))}` },
+                                { name: 'Biscoito', valid: false, date: `VAL: ${formatDate(new Date(today.getFullYear() - 1, getRandomInt(0, 11), getRandomInt(1, 28)))}` },
+                                { name: 'Iogurte', valid: false, date: `VAL: ${formatDate(new Date(today.getFullYear() - 2, getRandomInt(0, 11), getRandomInt(1, 28)))}` },
                             ].sort(() => Math.random() - 0.5); // Embaralha
 
                             container.innerHTML = `<div class="packaging-container"></div>`;
@@ -665,7 +650,6 @@
                                 itemEl.className = 'packaging-item';
                                 itemEl.innerHTML = `<h3>${item.name}</h3><p>${item.date}</p>`;
                                 itemEl.addEventListener('click', () => {
-                                    playSound('click');
                                     recordAttempt(1, 3, item.valid);
                                     if(item.valid) {
                                         showFeedback('Missão 1 completa!', true);
@@ -681,49 +665,58 @@
             2: {
                 title: "Missão 2: Contabilizando as Provas",
                 challenges: [
-                    { // Desafio 2.1: Adição
-                        instruction: "Agente, encontramos 148 grampos de cabelo em um esconderijo e mais 75 em outro. Quantos grampos ele tem no total?",
+                    { // Desafio 2.1: Adição Dinâmica
+                        instruction: "Agente, precisamos somar estas pistas. Resolva a operação:",
                         render: (container) => {
+                            const problem = generateAdditionProblem();
                             container.innerHTML = `
+                                <p style="font-size: 2rem; font-weight: bold;">${problem.num1} + ${problem.num2}</p>
                                 <input type="number" id="math-answer" class="challenge-input" placeholder="Total">
                                 <button id="check-math-btn" class="btn">Verificar</button>
                             `;
                             document.getElementById('check-math-btn').addEventListener('click', () => {
-                                playSound('click');
                                 const answer = document.getElementById('math-answer').value;
-                                const isCorrect = answer === '223';
+                                const isCorrect = parseInt(answer) === problem.answer;
                                 recordAttempt(2, 1, isCorrect);
                                 if(isCorrect) setTimeout(() => startMission(2, 1), 1600);
                             });
                         }
                     },
-                    { // Desafio 2.2: Subtração
-                        instruction: "Você tem 250 créditos de energia. A próxima fase custa 89 créditos. Quantos créditos sobrarão?",
+                    { // Desafio 2.2: Subtração Dinâmica
+                        instruction: "Você precisa calcular os recursos restantes. Resolva a operação:",
                         render: (container) => {
+                            const problem = generateSubtractionProblem();
                              container.innerHTML = `
+                                <p style="font-size: 2rem; font-weight: bold;">${problem.num1} - ${problem.num2}</p>
                                 <input type="number" id="math-answer" class="challenge-input" placeholder="Restante">
                                 <button id="check-math-btn" class="btn">Verificar</button>
                             `;
                             document.getElementById('check-math-btn').addEventListener('click', () => {
-                                playSound('click');
                                 const answer = document.getElementById('math-answer').value;
-                                const isCorrect = answer === '161';
+                                const isCorrect = parseInt(answer) === problem.answer;
                                 recordAttempt(2, 2, isCorrect);
                                 if(isCorrect) setTimeout(() => startMission(2, 2), 1600);
                             });
                         }
                     },
-                     { // Desafio 2.3: Problema
-                        instruction: "O Dr. Desordem roubou 320 clipes de papel. Ele deixou 115 caírem durante a fuga. Com quantos clipes ele escapou?",
+                     { // Desafio 2.3: Problema Dinâmico
+                        instruction: "Resolva este problema para decifrar a pista final:",
                         render: (container) => {
-                             container.innerHTML = `
+                            const problemTemplates = [
+                                { type: 'add', text: (n1, n2) => `O Dr. Desordem escondeu ${n1} diamantes e depois mais ${n2}. Quantos diamantes ele escondeu no total?`},
+                                { type: 'sub', text: (n1, n2) => `A agente Ana tinha ${n1} dispositivos de espionagem, mas usou ${n2} na missão. Quantos restaram?`}
+                            ];
+                            const template = problemTemplates[getRandomInt(0, 1)];
+                            const problem = template.type === 'add' ? generateAdditionProblem() : generateSubtractionProblem();
+                            
+                            container.innerHTML = `
+                                <p>${template.text(problem.num1, problem.num2)}</p>
                                 <input type="number" id="math-answer" class="challenge-input" placeholder="Resposta">
                                 <button id="check-math-btn" class="btn">Verificar</button>
                             `;
                             document.getElementById('check-math-btn').addEventListener('click', () => {
-                                playSound('click');
                                 const answer = document.getElementById('math-answer').value;
-                                const isCorrect = answer === '205';
+                                const isCorrect = parseInt(answer) === problem.answer;
                                 recordAttempt(2, 3, isCorrect);
                                 if(isCorrect) {
                                     showFeedback('Missão 2 completa!', true);
@@ -737,10 +730,16 @@
             3: {
                 title: "Missão 3: O Cofre Geométrico",
                 challenges: [
-                    { // Desafio 3.1: Formas Planas
-                        instruction: "Para abrir a primeira trava, pressione os botões na sequência correta: Quadrado, Círculo, Triângulo, Retângulo.",
+                    { // Desafio 3.1: Formas Planas Dinâmicas
+                        instruction: "Para abrir a primeira trava, pressione os botões na sequência correta:",
                         render: (container) => {
-                            const correctSequence = ['square', 'circle', 'triangle', 'rectangle'];
+                            const shapes = ['quadrado', 'círculo', 'triângulo', 'retângulo'];
+                            const shapeMap = { 'quadrado': 'square', 'círculo': 'circle', 'triângulo': 'triangle', 'retângulo': 'rectangle'};
+                            const shuffledShapes = [...shapes].sort(() => Math.random() - 0.5);
+                            const correctSequence = shuffledShapes.map(s => shapeMap[s]);
+                            
+                            container.parentElement.querySelector('#mission-instruction').textContent = `Para abrir a primeira trava, pressione os botões na sequência correta: ${shuffledShapes.join(', ')}.`;
+
                             let userSequence = [];
                             container.innerHTML = `
                                 <div class="shape-container">
@@ -756,10 +755,9 @@
                             
                             shapeBtns.forEach(btn => {
                                 btn.addEventListener('click', () => {
-                                    playSound('click');
                                     const shape = btn.dataset.shape;
                                     userSequence.push(shape);
-                                    sequenceDisplay.textContent = userSequence.join(', ');
+                                    sequenceDisplay.textContent = userSequence.map(s => Object.keys(shapeMap).find(key => shapeMap[key] === s)).join(', ');
 
                                     if(userSequence.length === correctSequence.length) {
                                         const isCorrect = JSON.stringify(userSequence) === JSON.stringify(correctSequence);
@@ -772,32 +770,35 @@
                             });
                         }
                     },
-                    { // Desafio 3.2: Formas Espaciais
-                        instruction: "O computador descreve o cofre: 'É uma forma que tem 6 faces, todas iguais e quadradas.' Selecione o objeto correto.",
+                    { // Desafio 3.2: Formas Espaciais Dinâmicas
+                        instruction: "O computador descreve o cofre. Selecione o objeto correto.",
                         render: (container) => {
-                            container.innerHTML = `
-                                <div class="spatial-shape-container">
-                                    <div class="spatial-shape-item" data-shape="cube">
-                                        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 30 L50 10 L80 30 L80 70 L50 90 L20 70 Z M20 30 L50 50 L80 30 M50 90 V 50' stroke='%23f0c419' fill='none' stroke-width='5'/></svg>" alt="Cubo">
-                                        <p>Cubo</p>
-                                    </div>
-                                    <div class="spatial-shape-item" data-shape="sphere">
-                                        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' stroke='%23f0c419' fill='none' stroke-width='5'/><ellipse cx='50' cy='50' rx='15' ry='40' stroke='%23f0c419' fill='none' stroke-width='3' stroke-dasharray='5,5'/></svg>" alt="Esfera">
-                                        <p>Esfera</p>
-                                    </div>
-                                     <div class="spatial-shape-item" data-shape="pyramid">
-                                        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 L20 90 H 80 Z M50 10 L50 90 M20 90 L80 90' stroke='%23f0c419' fill='none' stroke-width='5'/></svg>" alt="Pirâmide">
-                                        <p>Pirâmide</p>
-                                    </div>
-                                </div>
-                            `;
-                            container.querySelectorAll('.spatial-shape-item').forEach(item => {
-                                item.addEventListener('click', () => {
-                                    playSound('click');
-                                    const isCorrect = item.dataset.shape === 'cube';
+                            const spatialShapes = [
+                                { name: 'cubo', desc: "É uma forma que tem 6 faces, todas iguais e quadradas.", svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gradCube" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:1" /><stop offset="100%" style="stop-color:rgb(255,165,0);stop-opacity:1" /></linearGradient></defs><path d="M50 15 L85 32.5 L85 67.5 L50 85 L15 67.5 L15 32.5 Z" fill="url(#gradCube)" stroke="#a07c00" stroke-width="2"/><path d="M50 15 L50 50 L15 32.5" fill="orange" stroke="#a07c00" stroke-width="1"/><path d="M50 50 L85 32.5" fill="yellow" stroke="#a07c00" stroke-width="1"/><path d="M50 50 L50 85" fill="gold" stroke="#a07c00" stroke-width="1"/></svg>` },
+                                { name: 'esfera', desc: "É uma forma perfeitamente redonda, como uma bola.", svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="gradSphere"><stop offset="10%" stop-color="white"/><stop offset="95%" stop-color="gold"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="url(#gradSphere)"/></svg>` },
+                                { name: 'pirâmide', desc: "É uma forma com uma base quadrada e faces triangulares que se encontram em um ponto.", svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gradPyramid" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:1" /><stop offset="100%" style="stop-color:rgb(255,165,0);stop-opacity:1" /></linearGradient></defs><polygon points="15,85 50,15 85,85" fill="url(#gradPyramid)" stroke="#a07c00" stroke-width="2"/><polygon points="15,85 50,15 50,85" fill="orange" stroke="#a07c00" stroke-width="1"/></svg>`},
+                                { name: 'cone', desc: "É uma forma com uma base circular e um vértice.", svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gradCone" x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" stop-color="white"/><stop offset="100%" stop-color="gold"/></linearGradient></defs><ellipse cx="50" cy="85" rx="40" ry="10" fill="darkorange" /><path d="M10 85 A 40 10 0 0 0 90 85 L50 15 Z" fill="url(#gradCone)"/></svg>`}
+                            ];
+                            
+                            const shuffledOptions = [...spatialShapes].sort(() => Math.random() - 0.5);
+                            const correctShape = spatialShapes[getRandomInt(0, spatialShapes.length - 1)];
+
+                            container.parentElement.querySelector('#mission-instruction').textContent = `O computador descreve o cofre: '${correctShape.desc}' Selecione o objeto correto.`;
+                            
+                            container.innerHTML = `<div class="spatial-shape-container"></div>`;
+                            const shapeContainer = container.querySelector('.spatial-shape-container');
+
+                            shuffledOptions.forEach(item => {
+                                const itemEl = document.createElement('div');
+                                itemEl.className = 'spatial-shape-item';
+                                itemEl.dataset.shape = item.name;
+                                itemEl.innerHTML = `${item.svg}<p>${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</p>`;
+                                shapeContainer.appendChild(itemEl);
+                                
+                                itemEl.addEventListener('click', () => {
+                                    const isCorrect = item.name === correctShape.name;
                                     recordAttempt(3, 2, isCorrect);
                                     if(isCorrect) {
-                                        showFeedback('Missão 3 completa!', true);
                                         setTimeout(checkGameOver, 1600);
                                     }
                                 });
@@ -819,7 +820,6 @@
             }
 
             document.getElementById('mission-title').textContent = mission.title;
-            document.getElementById('mission-instruction').textContent = challenge.instruction;
             const challengeArea = document.getElementById('challenge-area');
             challenge.render(challengeArea);
             showScreen('mission-content-screen');
@@ -880,10 +880,6 @@
 
         // Função para enviar o relatório por e-mail
         async function sendReportByEmail() {
-            // Este endpoint é do serviço gratuito Formspree.io.
-            // Ele está configurado para enviar para o e-mail: alexandrekulpel@gmail.com
-            // Na primeira vez que for usado, o Formspree enviará um e-mail de confirmação.
-            // É necessário clicar no link de confirmação para que os futuros relatórios cheguem.
             const formspreeEndpoint = 'https://formspree.io/f/mqkrvylk';
 
             const challengeNames = {
@@ -937,8 +933,6 @@
         startGameBtn.addEventListener('click', () => {
             playerName = playerNameInput.value.trim();
             if (playerName) {
-                playSound('click');
-                playSound('music');
                 initializeGameData();
                 updateMissionButtons();
                 missionsHeader.textContent = `Quartel-General do Agente ${playerName}`;
@@ -947,15 +941,12 @@
         });
 
         backToMissionsBtn.addEventListener('click', () => {
-            playSound('click');
             showScreen('missions-screen');
         });
 
         missionBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                playSound('click');
                 if (btn.classList.contains('locked')) {
-                    playSound('incorrect');
                     showFeedback('Complete a missão anterior primeiro!', false);
                     return;
                 }
@@ -973,7 +964,6 @@
         });
 
         showReportBtn.addEventListener('click', () => {
-            playSound('click');
             reportHeader.textContent = `Relatório do Agente ${playerName}`;
             reportSubheader.textContent = `Análise de desempenho na missão.`;
             generateReportHTML();
@@ -981,14 +971,12 @@
         });
 
         playAgainBtn.addEventListener('click', () => {
-            playSound('click');
             playerNameInput.value = '';
             startGameBtn.disabled = true;
             showScreen('login-screen');
         });
         
         backToStartBtn.addEventListener('click', () => {
-            playSound('click');
             playerNameInput.value = '';
             startGameBtn.disabled = true;
             showScreen('login-screen');
