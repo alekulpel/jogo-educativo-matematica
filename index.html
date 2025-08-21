@@ -434,7 +434,7 @@
         // Função para mostrar feedback (modal)
         function showFeedback(message, isSuccess) {
             feedbackMessage.textContent = message;
-            modalContentBox.className = 'modal-content'; // Reseta as classes
+            modalContentBox.className = 'modal-content';
             modalContentBox.classList.add(isSuccess ? 'success' : 'error');
             feedbackModal.style.display = 'flex';
 
@@ -443,7 +443,7 @@
             }, 1500);
         }
 
-        // Atualiza o estado dos botões de missão (bloqueado/completo)
+        // Atualiza o estado dos botões de missão
         function updateMissionButtons() {
             missionBtns.forEach(btn => {
                 const missionId = btn.dataset.mission;
@@ -453,8 +453,7 @@
                 } else {
                     if (missionId == 2 && !gameData.missions[1].completed) {
                         btn.classList.add('locked');
-                    }
-                    else if (missionId == 3 && !gameData.missions[2].completed) {
+                    } else if (missionId == 3 && !gameData.missions[2].completed) {
                         btn.classList.add('locked');
                     }
                 }
@@ -466,7 +465,7 @@
             const mission = gameData.missions[missionId];
             const challenges = Object.values(mission.challenges);
             const allChallengesDone = challenges.every(c => c.success > 0);
-            if(allChallengesDone) {
+            if (allChallengesDone) {
                 mission.completed = true;
             }
         }
@@ -491,12 +490,13 @@
                  if (isSuccess) {
                     challenge.success = 1;
                  }
-            } else if (isSuccess && challenge.success === 0) {
-                // Para a progressão, marca como sucesso na primeira resposta correta, mesmo que não seja a primeira tentativa.
-                challenge.success = 1;
             }
             
             if (isSuccess) {
+                // Para a progressão, marca como sucesso na primeira resposta correta, mesmo que não seja a primeira tentativa.
+                if (challenge.success === 0) {
+                    challenge.success = 1;
+                }
                 showFeedback('Incrível, Agente!', true);
                 checkMissionCompletion(missionId);
                 updateMissionButtons();
@@ -629,7 +629,8 @@
                     { 
                         instruction: "Encontramos o lanche do Dr. Desordem. Só podemos abrir a embalagem que está dentro da validade. Qual delas é?",
                         render: (container) => {
-                            container.parentElement.querySelector('#mission-instruction').textContent = this.instruction;
+                            // CORREÇÃO: Atualiza o texto da instrução para este desafio.
+                            container.parentElement.querySelector('#mission-instruction').textContent = missions[1].challenges[2].instruction;
                             const today = new Date();
                             const formatDate = (date) => `${date.getDate().toString().padStart(2,'0')}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getFullYear().toString().slice(-2)}`;
                             const items = [
@@ -662,7 +663,7 @@
                     { 
                         instruction: "Agente, precisamos somar estas pistas. Resolva a operação:",
                         render: (container) => {
-                            container.parentElement.querySelector('#mission-instruction').textContent = this.instruction;
+                            container.parentElement.querySelector('#mission-instruction').textContent = missions[2].challenges[0].instruction;
                             const problem = generateAdditionProblem();
                             container.innerHTML = `
                                 <p style="font-size: 2rem; font-weight: bold;">${problem.num1} + ${problem.num2}</p>
@@ -680,7 +681,7 @@
                     { 
                         instruction: "Você precisa calcular os recursos restantes. Resolva a operação:",
                         render: (container) => {
-                            container.parentElement.querySelector('#mission-instruction').textContent = this.instruction;
+                            container.parentElement.querySelector('#mission-instruction').textContent = missions[2].challenges[1].instruction;
                             const problem = generateSubtractionProblem();
                              container.innerHTML = `
                                 <p style="font-size: 2rem; font-weight: bold;">${problem.num1} - ${problem.num2}</p>
@@ -698,7 +699,7 @@
                      { 
                         instruction: "Resolva este problema para decifrar a pista final:",
                         render: (container) => {
-                            container.parentElement.querySelector('#mission-instruction').textContent = this.instruction;
+                            container.parentElement.querySelector('#mission-instruction').textContent = missions[2].challenges[2].instruction;
                             const problemTemplates = [
                                 { type: 'add', text: (n1, n2) => `O Dr. Desordem escondeu ${n1} diamantes e depois mais ${n2}. Quantos diamantes ele escondeu no total?`},
                                 { type: 'sub', text: (n1, n2) => `A agente Ana tinha ${n1} dispositivos de espionagem, mas usou ${n2} na missão. Quantos restaram?`}
@@ -805,7 +806,6 @@
                 return;
             }
             document.getElementById('mission-title').textContent = mission.title;
-            // A render function agora é responsável por setar a instrução
             const challengeArea = document.getElementById('challenge-area');
             challenge.render(challengeArea);
             showScreen('mission-content-screen');
