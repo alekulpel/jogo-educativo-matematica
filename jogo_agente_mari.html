@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missão Agente Secreta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        :root {
+            --background-color: #1a233b;
+            --primary-color: #2c3a5e;
+            --accent-color: #f0c419;
+            --text-color: #e0e0e0;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --locked-color: #5a688a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--primary-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border: 3px solid var(--accent-color);
+            overflow: hidden;
+            position: relative; /* Para o botão de mudo */
+        }
+        
+        /* Botão de Mudo */
+        #mute-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+        #mute-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--accent-color);
+        }
+
+        /* Estilos das Telas */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        h1, h2 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 4vw, 1.8rem);
+        }
+
+        p {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* Botões */
+        .btn {
+            background-color: var(--accent-color);
+            color: var(--background-color);
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        
+        .btn:disabled {
+            background-color: var(--locked-color);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .mission-btn.locked {
+            background-color: var(--locked-color);
+            color: #9eabc2;
+            cursor: not-allowed;
+        }
+        
+        .mission-btn.locked:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .mission-btn.completed {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        /* Estilos dos Desafios */
+        .challenge-container {
+            width: 100%;
+            background-color: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .challenge-input {
+            padding: 10px;
+            font-size: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--accent-color);
+            background-color: var(--text-color);
+            color: var(--background-color);
+            text-align: center;
+            width: 150px;
+            margin: 10px;
+        }
+
+        /* Desafio do Calendário */
+        #calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        .calendar-day, .calendar-header {
+            background-color: var(--locked-color);
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .calendar-header {
+            background-color: transparent;
+            color: var(--accent-color);
+        }
+        .calendar-day:not(.empty) {
+            cursor: pointer;
+        }
+        .calendar-day.start-day {
+            background-color: var(--accent-color);
+            color: var(--background-color);
+        }
+        .calendar-day:not(.empty):hover {
+            background-color: #8a99bd;
+        }
+
+        /* Desafio das Embalagens */
+        .packaging-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .packaging-item {
+            background-color: #fff;
+            color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .packaging-item:hover {
+            transform: scale(1.05);
+        }
+
+        /* Desafio das Formas */
+        .shape-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .shape-btn {
+            width: 80px;
+            height: 80px;
+            background-color: var(--locked-color);
+            border: 3px solid var(--accent-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .shape-btn:hover {
+            background-color: #8a99bd;
+        }
+        .shape-btn.square { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" fill="%23f0c419"/></svg>'); }
+        .shape-btn.circle { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23f0c419"/></svg>'); }
+        .shape-btn.triangle { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="%23f0c419"/></svg>'); }
+        .shape-btn.rectangle { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="25" width="80" height="50" fill="%23f0c419"/></svg>'); }
+        
+        .spatial-shape-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .spatial-shape-item {
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            transition: background-color 0.2s;
+        }
+        .spatial-shape-item:hover {
+            background-color: var(--locked-color);
+        }
+        .spatial-shape-item img {
+            width: 100px;
+            height: 100px;
+        }
+
+        /* Relatório */
+        #report-content {
+            text-align: left;
+            width: 100%;
+        }
+        .report-section {
+            background-color: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .report-section h3 {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .report-item {
+            margin-bottom: 5px;
+        }
+        .highlight {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        .to-train {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* Modal de Feedback */
+        #feedback-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            padding: 40px;
+            background-color: var(--primary-color);
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border: 3px solid;
+        }
+        .modal-content.success {
+            border-color: var(--success-color);
+        }
+        .modal-content.error {
+            border-color: var(--error-color);
+        }
+        .modal-content h3 {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        /* Ícones SVG */
+        .icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Rodapé */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: var(--locked-color);
+        }
+        footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- BOTÃO DE MUDO -->
+        <button id="mute-btn">
+            <svg id="sound-on-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <svg id="sound-off-icon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+        </button>
+
+        <!-- TELA DE LOGIN -->
+        <div id="login-screen" class="screen active">
+            <h1><svg class="icon" style="width:40px; height:40px; display:inline-block; vertical-align: -5px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Missão Agente Secreta</h1>
+            <p>Digite o nome do agente para iniciar a missão!</p>
+            <input type="text" id="player-name-input" class="challenge-input" placeholder="Nome do Agente" style="width: 250px;">
+            <button id="start-game-btn" class="btn" disabled>Iniciar Missão</button>
+            <footer>
+                <p>Desenvolvido por: Alexandre Kulpel</p>
+                <p>Contato: <a href="mailto:alexandrekulpel@gmail.com">alexandrekulpel@gmail.com</a></p>
+            </footer>
+        </div>
+
+        <!-- TELA DE MISSÕES -->
+        <div id="missions-screen" class="screen">
+            <h2 id="missions-header">Quartel-General</h2>
+            <p>Selecione sua próxima missão para deter o Dr. Desordem!</p>
+            <div id="missions-container">
+                <button id="mission-1-btn" class="mission-btn btn" data-mission="1">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Missão 1: O Cronograma Secreto
+                </button>
+                <button id="mission-2-btn" class="mission-btn btn" data-mission="2">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Missão 2: Contabilizando as Provas
+                </button>
+                <button id="mission-3-btn" class="mission-btn btn" data-mission="3">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
+                    Missão 3: O Cofre Geométrico
+                </button>
+            </div>
+        </div>
+
+        <!-- TELA DE CONTEÚDO DA MISSÃO -->
+        <div id="mission-content-screen" class="screen">
+            <h2 id="mission-title"></h2>
+            <p id="mission-instruction"></p>
+            <div id="challenge-area" class="challenge-container">
+                <!-- O conteúdo do desafio será injetado aqui -->
+            </div>
+            <button id="back-to-missions-btn" class="btn" style="background-color: var(--locked-color); margin-top: 20px;">Voltar para Missões</button>
+        </div>
+
+        <!-- TELA DE FIM DE JOGO -->
+        <div id="game-over-screen" class="screen">
+            <h2>Missão Cumprida!</h2>
+            <p id="game-over-message"></p>
+            <button id="show-report-btn" class="btn">Ver Relatório de Desempenho</button>
+            <button id="play-again-btn" class="btn" style="background-color: var(--success-color);">Jogar Novamente</button>
+        </div>
+
+        <!-- TELA DE RELATÓRIO -->
+        <div id="report-screen" class="screen">
+            <h2 id="report-header">Relatório de Desempenho</h2>
+            <p id="report-subheader">Análise de progresso do agente.</p>
+            <div id="report-content"></div>
+            <button id="back-to-start-btn" class="btn" style="background-color: var(--locked-color); margin-top: 20px;">Voltar ao Início</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE FEEDBACK -->
+    <div id="feedback-modal">
+        <div id="modal-content-box" class="modal-content">
+            <h3 id="feedback-message"></h3>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Elementos da UI
+        const screens = document.querySelectorAll('.screen');
+        const feedbackModal = document.getElementById('feedback-modal');
+        const modalContentBox = document.getElementById('modal-content-box');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const playerNameInput = document.getElementById('player-name-input');
+        const missionsHeader = document.getElementById('missions-header');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const reportHeader = document.getElementById('report-header');
+        const reportSubheader = document.getElementById('report-subheader');
+
+        // Botões
+        const startGameBtn = document.getElementById('start-game-btn');
+        const backToMissionsBtn = document.getElementById('back-to-missions-btn');
+        const missionBtns = document.querySelectorAll('.mission-btn');
+        const muteBtn = document.getElementById('mute-btn');
+        const soundOnIcon = document.getElementById('sound-on-icon');
+        const soundOffIcon = document.getElementById('sound-off-icon');
+        const showReportBtn = document.getElementById('show-report-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const backToStartBtn = document.getElementById('back-to-start-btn');
+
+        // Dados do Jogo
+        let gameData;
+        let playerName = '';
+        let isMuted = false;
+
+        // --- CONTROLE DE ÁUDIO ---
+        const audioSources = {
+            music: 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1BpbmdlciBmb3IgTEFNRSBjb2RlYwBCbHVlIFNreQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRGFtZTMuOTkuNVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//tAwSAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+            correct: 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1BpbmdlciBmb3IgTEFNRSBjb2RlYwB0aW5nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRGFtZTMuOTkuNVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//tAwSAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+            incorrect: 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1BpbmdlciBmb3IgTEFNRSBjb2RlYwBidXp6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRGFtZTMuOTkuNVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//tAwSAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+            click: 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1BpbmdlciBmb3IgTEFNRSBjb2RlYwBjbGljawAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRGFtZTMuOTkuNVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//tAwSAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tAwRAAAAAAD/wAABpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        };
+
+        const audio = {};
+        for (const key in audioSources) {
+            audio[key] = new Audio(audioSources[key]);
+        }
+        audio.music.loop = true;
+        audio.music.volume = 0.3;
+
+        function playSound(soundName) {
+            if (!isMuted) {
+                const sound = audio[soundName];
+                if (sound) {
+                    sound.currentTime = 0;
+                    sound.play().catch(e => console.log("Audio play failed:", e));
+                }
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            soundOnIcon.style.display = isMuted ? 'none' : 'block';
+            soundOffIcon.style.display = isMuted ? 'block' : 'none';
+            audio.music.muted = isMuted;
+        }
+
+        muteBtn.addEventListener('click', toggleMute);
+        // --- FIM DO CONTROLE DE ÁUDIO ---
+
+
+        // Função para inicializar/resetar os dados do jogo
+        function initializeGameData() {
+            gameData = {
+                missions: {
+                    1: { completed: false, challenges: { 1: { attempts: 0, success: 0 }, 2: { attempts: 0, success: 0 }, 3: { attempts: 0, success: 0 } } },
+                    2: { completed: false, challenges: { 1: { attempts: 0, success: 0 }, 2: { attempts: 0, success: 0 }, 3: { attempts: 0, success: 0 } } },
+                    3: { completed: false, challenges: { 1: { attempts: 0, success: 0 }, 2: { attempts: 0, success: 0 } } }
+                }
+            };
+        }
+
+        // Função para navegar entre as telas
+        function showScreen(screenId) {
+            screens.forEach(screen => screen.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Função para mostrar feedback (modal)
+        function showFeedback(message, isSuccess) {
+            feedbackMessage.textContent = message;
+            modalContentBox.className = 'modal-content'; // Reseta as classes
+            modalContentBox.classList.add(isSuccess ? 'success' : 'error');
+            feedbackModal.style.display = 'flex';
+
+            setTimeout(() => {
+                feedbackModal.style.display = 'none';
+            }, 1500);
+        }
+
+        // Atualiza o estado dos botões de missão (bloqueado/completo)
+        function updateMissionButtons() {
+            missionBtns.forEach(btn => {
+                const missionId = btn.dataset.mission;
+                btn.classList.remove('completed', 'locked');
+                if (gameData.missions[missionId].completed) {
+                    btn.classList.add('completed');
+                } else {
+                    if (missionId == 2 && !gameData.missions[1].completed) {
+                        btn.classList.add('locked');
+                    }
+                    else if (missionId == 3 && !gameData.missions[2].completed) {
+                        btn.classList.add('locked');
+                    }
+                }
+            });
+        }
+        
+        // Verifica se uma missão foi concluída
+        function checkMissionCompletion(missionId) {
+            const mission = gameData.missions[missionId];
+            const challenges = Object.values(mission.challenges);
+            const allChallengesDone = challenges.every(c => c.success > 0);
+            if(allChallengesDone) {
+                mission.completed = true;
+            }
+        }
+
+        // Verifica se o jogo terminou
+        function checkGameOver() {
+            const allMissions = Object.values(gameData.missions);
+            const allMissionsCompleted = allMissions.every(m => m.completed);
+            if (allMissionsCompleted) {
+                audio.music.pause();
+                gameOverMessage.textContent = `Parabéns, Agente ${playerName}! Você deteve o Dr. Desordem e recuperou os itens secretos.`;
+                sendReportByEmail();
+                showScreen('game-over-screen');
+            }
+        }
+
+        // Registra uma tentativa em um desafio
+        function recordAttempt(missionId, challengeId, isSuccess) {
+            const challenge = gameData.missions[missionId].challenges[challengeId];
+            // Só registra a primeira tentativa para o relatório
+            if (challenge.attempts === 0) {
+                 challenge.attempts++;
+                 if (isSuccess) {
+                    challenge.success++;
+                 }
+            }
+            
+            if (isSuccess) {
+                playSound('correct');
+                showFeedback('Incrível, Agente!', true);
+            } else {
+                playSound('incorrect');
+                showFeedback('Tente de novo, agente!', false);
+            }
+            
+            if (isSuccess) {
+                checkMissionCompletion(missionId);
+                updateMissionButtons();
+            }
+        }
+
+        // --- Lógica das Missões ---
+        const missions = {
+            1: {
+                title: "Missão 1: O Cronograma Secreto",
+                challenges: [
+                    { // Desafio 1.1: Calendário
+                        instruction: "Agente, o Dr. Desordem planeja agir 2 semanas e 3 dias depois de 10 de maio. Use o calendário para descobrir a data exata.",
+                        render: (container) => {
+                            const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                            const calendar = document.createElement('div');
+                            calendar.id = 'calendar';
+                            
+                            daysOfWeek.forEach(day => {
+                                const header = document.createElement('div');
+                                header.className = 'calendar-header';
+                                header.textContent = day;
+                                calendar.appendChild(header);
+                            });
+
+                            const firstDayOfMonth = 4; // Maio de 2025 começa numa Quinta-feira
+                            for(let i = 0; i < firstDayOfMonth; i++) {
+                                const empty = document.createElement('div');
+                                empty.className = 'calendar-day empty';
+                                calendar.appendChild(empty);
+                            }
+
+                            for(let day = 1; day <= 31; day++) {
+                                const dayEl = document.createElement('div');
+                                dayEl.className = 'calendar-day';
+                                dayEl.textContent = day;
+                                dayEl.dataset.day = day;
+                                if (day === 10) dayEl.classList.add('start-day');
+                                
+                                dayEl.addEventListener('click', () => {
+                                    playSound('click');
+                                    const isCorrect = day === 27; // 10 + 14 + 3
+                                    recordAttempt(1, 1, isCorrect);
+                                    if(isCorrect) {
+                                       setTimeout(() => startMission(1, 1), 1600);
+                                    }
+                                });
+                                calendar.appendChild(dayEl);
+                            }
+                            container.innerHTML = '';
+                            container.appendChild(calendar);
+                        }
+                    },
+                    { // Desafio 1.2: Relógio Digital
+                        instruction: "A pista diz que o alarme secreto tocará às 'quinze horas e quarenta e cinco minutos'. Ajuste o relógio digital para desativá-lo!",
+                        render: (container) => {
+                            container.innerHTML = `
+                                <input type="number" id="hours-input" class="challenge-input" min="0" max="23" placeholder="HH">
+                                <span>:</span>
+                                <input type="number" id="minutes-input" class="challenge-input" min="0" max="59" placeholder="MM">
+                                <br>
+                                <button id="check-time-btn" class="btn">Verificar</button>
+                            `;
+                            document.getElementById('check-time-btn').addEventListener('click', () => {
+                                playSound('click');
+                                const hours = document.getElementById('hours-input').value;
+                                const minutes = document.getElementById('minutes-input').value;
+                                const isCorrect = hours === '15' && minutes === '45';
+                                recordAttempt(1, 2, isCorrect);
+                                if(isCorrect) {
+                                   setTimeout(() => startMission(1, 2), 1600);
+                                }
+                            });
+                        }
+                    },
+                    { // Desafio 1.3: Datas de Validade
+                        instruction: "Encontramos o lanche do Dr. Desordem. Só podemos abrir a embalagem que está dentro da validade. Qual delas é?",
+                        render: (container) => {
+                            const today = new Date();
+                            const validDate = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+                            
+                            const items = [
+                                { name: 'Suco de Uva', valid: true, date: `VAL: ${validDate.getDate().toString().padStart(2,'0')}/${(validDate.getMonth()+1).toString().padStart(2,'0')}/${validDate.getFullYear().toString().slice(-2)}` },
+                                { name: 'Biscoito', valid: false, date: 'VAL: 01/03/24' },
+                                { name: 'Iogurte', valid: false, date: 'VAL: 15/01/25' },
+                            ].sort(() => Math.random() - 0.5); // Embaralha
+
+                            container.innerHTML = `<div class="packaging-container"></div>`;
+                            const pkgContainer = container.querySelector('.packaging-container');
+
+                            items.forEach(item => {
+                                const itemEl = document.createElement('div');
+                                itemEl.className = 'packaging-item';
+                                itemEl.innerHTML = `<h3>${item.name}</h3><p>${item.date}</p>`;
+                                itemEl.addEventListener('click', () => {
+                                    playSound('click');
+                                    recordAttempt(1, 3, item.valid);
+                                    if(item.valid) {
+                                        showFeedback('Missão 1 completa!', true);
+                                        setTimeout(() => showScreen('missions-screen'), 1600);
+                                    }
+                                });
+                                pkgContainer.appendChild(itemEl);
+                            });
+                        }
+                    }
+                ]
+            },
+            2: {
+                title: "Missão 2: Contabilizando as Provas",
+                challenges: [
+                    { // Desafio 2.1: Adição
+                        instruction: "Agente, encontramos 148 grampos de cabelo em um esconderijo e mais 75 em outro. Quantos grampos ele tem no total?",
+                        render: (container) => {
+                            container.innerHTML = `
+                                <input type="number" id="math-answer" class="challenge-input" placeholder="Total">
+                                <button id="check-math-btn" class="btn">Verificar</button>
+                            `;
+                            document.getElementById('check-math-btn').addEventListener('click', () => {
+                                playSound('click');
+                                const answer = document.getElementById('math-answer').value;
+                                const isCorrect = answer === '223';
+                                recordAttempt(2, 1, isCorrect);
+                                if(isCorrect) setTimeout(() => startMission(2, 1), 1600);
+                            });
+                        }
+                    },
+                    { // Desafio 2.2: Subtração
+                        instruction: "Você tem 250 créditos de energia. A próxima fase custa 89 créditos. Quantos créditos sobrarão?",
+                        render: (container) => {
+                             container.innerHTML = `
+                                <input type="number" id="math-answer" class="challenge-input" placeholder="Restante">
+                                <button id="check-math-btn" class="btn">Verificar</button>
+                            `;
+                            document.getElementById('check-math-btn').addEventListener('click', () => {
+                                playSound('click');
+                                const answer = document.getElementById('math-answer').value;
+                                const isCorrect = answer === '161';
+                                recordAttempt(2, 2, isCorrect);
+                                if(isCorrect) setTimeout(() => startMission(2, 2), 1600);
+                            });
+                        }
+                    },
+                     { // Desafio 2.3: Problema
+                        instruction: "O Dr. Desordem roubou 320 clipes de papel. Ele deixou 115 caírem durante a fuga. Com quantos clipes ele escapou?",
+                        render: (container) => {
+                             container.innerHTML = `
+                                <input type="number" id="math-answer" class="challenge-input" placeholder="Resposta">
+                                <button id="check-math-btn" class="btn">Verificar</button>
+                            `;
+                            document.getElementById('check-math-btn').addEventListener('click', () => {
+                                playSound('click');
+                                const answer = document.getElementById('math-answer').value;
+                                const isCorrect = answer === '205';
+                                recordAttempt(2, 3, isCorrect);
+                                if(isCorrect) {
+                                    showFeedback('Missão 2 completa!', true);
+                                    setTimeout(() => showScreen('missions-screen'), 1600);
+                                }
+                            });
+                        }
+                    }
+                ]
+            },
+            3: {
+                title: "Missão 3: O Cofre Geométrico",
+                challenges: [
+                    { // Desafio 3.1: Formas Planas
+                        instruction: "Para abrir a primeira trava, pressione os botões na sequência correta: Quadrado, Círculo, Triângulo, Retângulo.",
+                        render: (container) => {
+                            const correctSequence = ['square', 'circle', 'triangle', 'rectangle'];
+                            let userSequence = [];
+                            container.innerHTML = `
+                                <div class="shape-container">
+                                    <div class="shape-btn square" data-shape="square"></div>
+                                    <div class="shape-btn circle" data-shape="circle"></div>
+                                    <div class="shape-btn triangle" data-shape="triangle"></div>
+                                    <div class="shape-btn rectangle" data-shape="rectangle"></div>
+                                </div>
+                                <p>Sequência clicada: <span id="sequence-display"></span></p>
+                            `;
+                            const shapeBtns = container.querySelectorAll('.shape-btn');
+                            const sequenceDisplay = document.getElementById('sequence-display');
+                            
+                            shapeBtns.forEach(btn => {
+                                btn.addEventListener('click', () => {
+                                    playSound('click');
+                                    const shape = btn.dataset.shape;
+                                    userSequence.push(shape);
+                                    sequenceDisplay.textContent = userSequence.join(', ');
+
+                                    if(userSequence.length === correctSequence.length) {
+                                        const isCorrect = JSON.stringify(userSequence) === JSON.stringify(correctSequence);
+                                        recordAttempt(3, 1, isCorrect);
+                                        userSequence = [];
+                                        sequenceDisplay.textContent = '';
+                                        if(isCorrect) setTimeout(() => startMission(3, 1), 1600);
+                                    }
+                                });
+                            });
+                        }
+                    },
+                    { // Desafio 3.2: Formas Espaciais
+                        instruction: "O computador descreve o cofre: 'É uma forma que tem 6 faces, todas iguais e quadradas.' Selecione o objeto correto.",
+                        render: (container) => {
+                            container.innerHTML = `
+                                <div class="spatial-shape-container">
+                                    <div class="spatial-shape-item" data-shape="cube">
+                                        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 30 L50 10 L80 30 L80 70 L50 90 L20 70 Z M20 30 L50 50 L80 30 M50 90 V 50' stroke='%23f0c419' fill='none' stroke-width='5'/></svg>" alt="Cubo">
+                                        <p>Cubo</p>
+                                    </div>
+                                    <div class="spatial-shape-item" data-shape="sphere">
+                                        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' stroke='%23f0c419' fill='none' stroke-width='5'/><ellipse cx='50' cy='50' rx='15' ry='40' stroke='%23f0c419' fill='none' stroke-width='3' stroke-dasharray='5,5'/></svg>" alt="Esfera">
+                                        <p>Esfera</p>
+                                    </div>
+                                     <div class="spatial-shape-item" data-shape="pyramid">
+                                        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 L20 90 H 80 Z M50 10 L50 90 M20 90 L80 90' stroke='%23f0c419' fill='none' stroke-width='5'/></svg>" alt="Pirâmide">
+                                        <p>Pirâmide</p>
+                                    </div>
+                                </div>
+                            `;
+                            container.querySelectorAll('.spatial-shape-item').forEach(item => {
+                                item.addEventListener('click', () => {
+                                    playSound('click');
+                                    const isCorrect = item.dataset.shape === 'cube';
+                                    recordAttempt(3, 2, isCorrect);
+                                    if(isCorrect) {
+                                        showFeedback('Missão 3 completa!', true);
+                                        setTimeout(checkGameOver, 1600);
+                                    }
+                                });
+                            });
+                        }
+                    }
+                ]
+            }
+        };
+
+        function startMission(missionId, challengeIndex = 0) {
+            const mission = missions[missionId];
+            if (!mission) return;
+
+            const challenge = mission.challenges[challengeIndex];
+            if(!challenge) {
+                showScreen('missions-screen');
+                return;
+            }
+
+            document.getElementById('mission-title').textContent = mission.title;
+            document.getElementById('mission-instruction').textContent = challenge.instruction;
+            const challengeArea = document.getElementById('challenge-area');
+            challenge.render(challengeArea);
+            showScreen('mission-content-screen');
+        }
+
+        function generateReportHTML() {
+            const reportContent = document.getElementById('report-content');
+            reportContent.innerHTML = ''; 
+
+            const missionNames = { 1: "Missão 1: Tempo", 2: "Missão 2: Matemática", 3: "Missão 3: Geometria" };
+            const challengeNames = {
+                1: { 1: "Calendário", 2: "Relógio Digital", 3: "Validade" },
+                2: { 1: "Adição", 2: "Subtração", 3: "Problema" },
+                3: { 1: "Formas Planas", 2: "Formas Espaciais" }
+            };
+            
+            let highlights = [];
+            let toTrain = [];
+
+            const missionsSection = document.createElement('div');
+            missionsSection.className = 'report-section';
+            missionsSection.innerHTML = '<h3>Status das Missões</h3>';
+            for (const missionId in gameData.missions) {
+                const mission = gameData.missions[missionId];
+                const status = mission.completed ? '<span class="highlight">Completa</span>' : 'Incompleta';
+                missionsSection.innerHTML += `<div class="report-item">${missionNames[missionId]}: ${status}</div>`;
+            }
+            reportContent.appendChild(missionsSection);
+
+            const skillsSection = document.createElement('div');
+            skillsSection.className = 'report-section';
+            skillsSection.innerHTML = '<h3>Desempenho por Habilidade (1ª Tentativa)</h3>';
+            for (const missionId in gameData.missions) {
+                for (const challengeId in gameData.missions[missionId].challenges) {
+                    const challenge = gameData.missions[missionId].challenges[challengeId];
+                    const name = challengeNames[missionId][challengeId];
+                    const { success, attempts } = challenge;
+                    const result = attempts > 0 ? (success > 0 ? '<span class="highlight">Acertou</span>' : '<span class="to-train">Errou</span>') : 'Não tentou';
+                    skillsSection.innerHTML += `<div class="report-item">${name}: ${result}</div>`;
+                    
+                    if (attempts > 0) {
+                        if (success > 0) highlights.push(name);
+                        else toTrain.push(name);
+                    }
+                }
+            }
+            reportContent.appendChild(skillsSection);
+
+            const summarySection = document.createElement('div');
+            summarySection.className = 'report-section';
+            summarySection.innerHTML = `
+                <h3>Resumo do Agente</h3>
+                <div class="report-item"><strong class="highlight">Habilidades de Destaque:</strong> ${highlights.length > 0 ? highlights.join(', ') : 'Nenhuma ainda.'}</div>
+                <div class="report-item"><strong class="to-train">Pontos para Treinar:</strong> ${toTrain.length > 0 ? toTrain.join(', ') : 'Nenhum no momento.'}</div>
+            `;
+            reportContent.appendChild(summarySection);
+        }
+
+        // Função para enviar o relatório por e-mail
+        async function sendReportByEmail() {
+            // Este endpoint é do serviço gratuito Formspree.io.
+            // Ele está configurado para enviar para o e-mail: alexandrekulpel@gmail.com
+            // Na primeira vez que for usado, o Formspree enviará um e-mail de confirmação.
+            // É necessário clicar no link de confirmação para que os futuros relatórios cheguem.
+            const formspreeEndpoint = 'https://formspree.io/f/mqkrvylk';
+
+            const challengeNames = {
+                1: { 1: "Calendário", 2: "Relógio Digital", 3: "Validade" },
+                2: { 1: "Adição", 2: "Subtração", 3: "Problema" },
+                3: { 1: "Formas Planas", 2: "Formas Espaciais" }
+            };
+
+            let reportText = `Relatório do Agente: ${playerName}\n\n`;
+            let highlights = [];
+            let toTrain = [];
+
+            for (const missionId in gameData.missions) {
+                for (const challengeId in gameData.missions[missionId].challenges) {
+                    const challenge = gameData.missions[missionId].challenges[challengeId];
+                    const name = challengeNames[missionId][challengeId];
+                    if (challenge.attempts > 0) {
+                        if (challenge.success > 0) {
+                            highlights.push(name);
+                        } else {
+                            toTrain.push(name);
+                        }
+                    }
+                }
+            }
+
+            reportText += `**Habilidades de Destaque:**\n- ${highlights.join('\n- ') || 'Nenhuma'}\n\n`;
+            reportText += `**Pontos para Treinar:**\n- ${toTrain.join('\n- ') || 'Nenhum'}\n`;
+
+            const data = {
+                subject: `Novo Relatório de Jogo: ${playerName}`,
+                message: reportText,
+            };
+
+            try {
+                await fetch(formspreeEndpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+            } catch (error) {
+                console.error('Erro ao enviar relatório por e-mail:', error);
+            }
+        }
+
+        // --- Event Listeners ---
+        playerNameInput.addEventListener('input', () => {
+            startGameBtn.disabled = playerNameInput.value.trim() === '';
+        });
+
+        startGameBtn.addEventListener('click', () => {
+            playerName = playerNameInput.value.trim();
+            if (playerName) {
+                playSound('click');
+                playSound('music');
+                initializeGameData();
+                updateMissionButtons();
+                missionsHeader.textContent = `Quartel-General do Agente ${playerName}`;
+                showScreen('missions-screen');
+            }
+        });
+
+        backToMissionsBtn.addEventListener('click', () => {
+            playSound('click');
+            showScreen('missions-screen');
+        });
+
+        missionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                playSound('click');
+                if (btn.classList.contains('locked')) {
+                    playSound('incorrect');
+                    showFeedback('Complete a missão anterior primeiro!', false);
+                    return;
+                }
+                const missionId = btn.dataset.mission;
+                const missionData = gameData.missions[missionId];
+                let firstIncomplete = 0;
+                for (const challengeId in missionData.challenges) {
+                    if (missionData.challenges[challengeId].success === 0) {
+                        firstIncomplete = parseInt(challengeId) - 1;
+                        break;
+                    }
+                }
+                startMission(missionId, firstIncomplete);
+            });
+        });
+
+        showReportBtn.addEventListener('click', () => {
+            playSound('click');
+            reportHeader.textContent = `Relatório do Agente ${playerName}`;
+            reportSubheader.textContent = `Análise de desempenho na missão.`;
+            generateReportHTML();
+            showScreen('report-screen');
+        });
+
+        playAgainBtn.addEventListener('click', () => {
+            playSound('click');
+            playerNameInput.value = '';
+            startGameBtn.disabled = true;
+            showScreen('login-screen');
+        });
+        
+        backToStartBtn.addEventListener('click', () => {
+            playSound('click');
+            playerNameInput.value = '';
+            startGameBtn.disabled = true;
+            showScreen('login-screen');
+        });
+
+    });
+    </script>
+</body>
+</html>
